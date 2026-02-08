@@ -9,8 +9,18 @@ import (
 // TCPPeer represents a remote node over a TCP established
 // connection
 type TCPPeer struct {
-	conn     net.Conn
-	outbound bool //outbound means you connect to other nodes inbound means the opposite
+	conn net.Conn //underlying connection of the peer
+
+	// if we dial and retrieve a connection outbound == true
+	// if we Accept and retrieve a connection outbound == false
+	outbound bool
+}
+
+func NewTCPPeer(conn net.Conn, outbound bool) *TCPPeer {
+	return &TCPPeer{
+		conn:     conn,
+		outbound: outbound,
+	}
 }
 
 type TCPtransport struct {
@@ -20,7 +30,7 @@ type TCPtransport struct {
 	peers         map[net.Addr]Peer
 }
 
-func newTCPTransport(listenAddr string) *TCPtransport {
+func NewTCPTransport(listenAddr string) *TCPtransport {
 	return &TCPtransport{
 		listenAddress: listenAddr,
 	}
@@ -50,5 +60,7 @@ func (t *TCPtransport) startAcceptLoop() {
 }
 
 func (t *TCPtransport) handleConn(conn net.Conn) {
-	fmt.Printf("new incoming connection %+v\n", conn)
+	peer := NewTCPPeer(conn, true)
+
+	fmt.Printf("new incoming connection %+v\n", peer)
 }
