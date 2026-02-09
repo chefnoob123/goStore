@@ -58,6 +58,8 @@ func (t *TCPtransport) startAcceptLoop() {
 		if err != nil {
 			fmt.Printf("TC Accept Error %s\n", err)
 		}
+
+		fmt.Printf("New incoming connection %+v\n", conn)
 		go t.handleConn(conn)
 	}
 }
@@ -67,14 +69,14 @@ type Temp struct{}
 func (t *TCPtransport) handleConn(conn net.Conn) {
 	peer := NewTCPPeer(conn, true)
 
-	if err := t.shakeHands(conn); err != nil {
+	if err := t.shakeHands(peer); err != nil {
 	}
 
 	lenDecodeError := 0
 	//Read Loop
-	// msg := &Temp{}
+	msg := &Temp{}
 	for {
-		if err := t.decoder.Decode(peer); err != nil {
+		if err := t.decoder.Decode(conn, msg); err != nil {
 			lenDecodeError += 1
 			fmt.Printf("TCP Error: %s\n", err)
 			continue
