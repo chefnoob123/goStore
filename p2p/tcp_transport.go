@@ -9,7 +9,7 @@ import (
 // TCPPeer represents a remote node over a TCP established
 // connection
 type TCPPeer struct {
-	conn net.Conn //underlying connection of the peer
+	conn net.Conn // underlying connection of the peer
 
 	// if we dial and retrieve a connection outbound == true
 	// if we Accept and retrieve a connection outbound == false
@@ -32,7 +32,7 @@ type TCPTransportOpts struct {
 type TCPtransport struct {
 	TCPTransportOpts
 	listener net.Listener
-	mu       sync.RWMutex //To protect the peers
+	mu       sync.RWMutex // To protect the peers
 	peers    map[net.Addr]Peer
 }
 
@@ -67,8 +67,6 @@ func (t *TCPtransport) startAcceptLoop() {
 	}
 }
 
-type Temp struct{}
-
 func (t *TCPtransport) handleConn(conn net.Conn) {
 	peer := NewTCPPeer(conn, true)
 
@@ -78,14 +76,16 @@ func (t *TCPtransport) handleConn(conn net.Conn) {
 		return
 	}
 
-	lenDecodeError := 0
-	//Read Loop
-	msg := &Temp{}
+	// lenDecodeError := 0
+	// Read Loop
+	msg := &Message{}
 	for {
 		if err := t.Decoder.Decode(conn, msg); err != nil {
-			lenDecodeError += 1
+			// lenDecodeError += 1
 			fmt.Printf("TCP Error: %s\n", err)
 			continue
 		}
+		msg.From = conn.RemoteAddr()
+		fmt.Printf("message: %+v\n", msg)
 	}
 }
